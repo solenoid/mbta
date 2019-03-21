@@ -4,10 +4,10 @@ Experiment with the MBTA API a bit.
 
 ## Getting Started
 
-You'll need to get dependencies and use pika to make them available as web modules.
+You'll need to get dependencies and prepare them as `web_modules` with [pika](https://www.pikapkg.com/).
 
 ```
-npm install && npm run prepare
+npm install
 ```
 
 To run things locally start up local server.
