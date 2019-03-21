@@ -9,6 +9,7 @@ class App extends Component {
     this.state = {
       routes: [],
       routesWithStops: [],
+      multiRouteStops: [],
       maxStops: NaN,
       minStops: NaN
     };
@@ -42,6 +43,20 @@ class App extends Component {
             const maxStops = Math.max(...stopCounts);
             const minStops = Math.min(...stopCounts);
             this.setState({ routesWithStops, maxStops, minStops });
+            const stopIndexed = routesWithStops.reduce((memo, r) => {
+              r.stops.forEach(s => {
+                // assume names are unique if not use ids instead
+                const stopKey = s.attributes.name;
+                memo[stopKey] = memo[stopKey] || [];
+                memo[stopKey].push(r.attributes.long_name);
+              });
+              return memo;
+            }, {});
+            const multiRouteStops = Object.entries(stopIndexed).filter(
+              ([e, v]) => v.length > 1
+            );
+            console.log(multiRouteStops);
+            this.setState({ multiRouteStops });
           })
           .catch(e => {
             console.error("fetch stops problem");
@@ -53,7 +68,7 @@ class App extends Component {
         console.error(e);
       });
   }
-  render(_, { routes, routesWithStops, maxStops, minStops }) {
+  render(_, { routes, routesWithStops, maxStops, minStops, multiRouteStops }) {
     return html`
       <div class="main">
         <section>
@@ -86,8 +101,14 @@ class App extends Component {
                   <div>${r.attributes.long_name}</div>
                 `
             )}
-          <h2>c) Fewest Stops</h2>
-          <div>coming up</div>
+          <h2>c) Multiple Routes</h2>
+          ${multiRouteStops.map(
+            ([s, rs]) =>
+              html`
+                <h3>${s} Stop is on these Routes</h3>
+                <p>${rs.join(", ")}</p>
+              `
+          )}
         </section>
       </div>
     `;
