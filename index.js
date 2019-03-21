@@ -72,14 +72,16 @@ class App extends Component {
               },
               new Set()
             );
-            /*
+            // TODO consider making a function to store on state that does a
+            //      DFS traverse of intersections
+            this.setState({ intersections });
+            return;
+            // useful for checking out what the route intersection graph looks like
             console.log(
               `graph {
   ${Array.from(intersections).join("\n  ")}
 }`
             );
-            /**/
-            this.setState({ intersections });
           })
           .catch(e => {
             console.error("fetch stops problem");
