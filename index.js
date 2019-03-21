@@ -55,7 +55,6 @@ class App extends Component {
             const multiRouteStops = Object.entries(stopIndexed).filter(
               ([e, v]) => v.length > 1
             );
-            console.log(multiRouteStops);
             this.setState({ multiRouteStops });
           })
           .catch(e => {
