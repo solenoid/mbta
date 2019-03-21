@@ -1,0 +1,19 @@
+{
+  "name": "mbta",
+  "version": "0.0.1",
+  "description": "Experiment with the MBTA API a bit.",
+  "main": "index.js",
+  "scripts": {
+    "prepare": "pika-web",
+    "start": "serve"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "htm": "2.1.1",
+    "preact": "8.4.2"
+  },
+  "devDependencies": {
+    "@pika/web": "0.4.0",
+    "serve": "10.1.2"
+  }
+}
