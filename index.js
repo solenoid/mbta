@@ -10,6 +10,7 @@ class App extends Component {
       routes: [],
       routesWithStops: [],
       multiRouteStops: [],
+      intersections: new Set(),
       maxStops: NaN,
       minStops: NaN
     };
@@ -56,6 +57,29 @@ class App extends Component {
               ([e, v]) => v.length > 1
             );
             this.setState({ multiRouteStops });
+            const intersections = multiRouteStops.reduce(
+              (memo, [_, routes]) => {
+                const stops = routes
+                  .map((r, i, list) => {
+                    return list.slice(i + 1).map(d =>
+                      // quotes are for graphviz output maybe get rid of them
+                      r < d ? `"${r}" -- "${d}"` : `"${d}" -- "${r}"`
+                    );
+                  })
+                  .flat();
+                stops.forEach(i => memo.add(i));
+                return memo;
+              },
+              new Set()
+            );
+            /*
+            console.log(
+              `graph {
+  ${Array.from(intersections).join("\n  ")}
+}`
+            );
+            /**/
+            this.setState({ intersections });
           })
           .catch(e => {
             console.error("fetch stops problem");
@@ -67,7 +91,17 @@ class App extends Component {
         console.error(e);
       });
   }
-  render(_, { routes, routesWithStops, maxStops, minStops, multiRouteStops }) {
+  render(
+    _,
+    {
+      routes,
+      routesWithStops,
+      maxStops,
+      minStops,
+      multiRouteStops,
+      intersections
+    }
+  ) {
     return html`
       <div class="main">
         <section>
@@ -75,7 +109,7 @@ class App extends Component {
           <ol>
             ${routes.map(
               r => html`
-                <li key=${r.id}>${r.attributes.long_name}</li>
+                <li>${r.attributes.long_name}</li>
               `
             )}
           </ol>
@@ -108,6 +142,12 @@ class App extends Component {
                 <p>${rs.join(", ")}</p>
               `
           )}
+        </section>
+        <section>
+          <h1>Problem 3)</h1>
+          <div>
+            ${intersections.size} unique intersections amongst routes
+          </div>
         </section>
       </div>
     `;
