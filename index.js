@@ -61,9 +61,7 @@ class App extends Component {
           <ol>
             ${routes.map(
               r => html`
-                <li key=${r.id}>
-                  ${r.attributes.long_name} (${r.id}) ${r.stops.length}
-                </li>
+                <li key=${r.id}>${r.attributes.long_name}</li>
               `
             )}
           </ol>
