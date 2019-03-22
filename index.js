@@ -62,7 +62,7 @@ class App extends Component {
               const beginEdges = edgeList.filter(edge => edge.indexOf(begin) > -1);
               const beginEndConnected = beginEdges.some(edge => edge.indexOf(end) > -1);
               if (beginEndConnected) {
-                return [begin, ...path, end];
+                return [...path, begin, end];
               }
               const nextEdges = beginEdges
                 .map(e => e.replace(begin, "").replace("-", ""))
@@ -99,6 +99,7 @@ class App extends Component {
       console.log(stopRouteFinder("Davis", "Kendall/MIT"));
       console.log(stopRouteFinder("Ashmont", "Arlington"));
       console.log(stopRouteFinder("Mattapan", "Wonderland"));
+      console.log(stopRouteFinder("Wonderland", "Mattapan"));
     }
     return html`
       <div>
