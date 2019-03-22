@@ -92,7 +92,7 @@ class App extends Component {
               if (!endRoutes) {
                 throw new Error(`Invalid end stop ${end}`);
               }
-              routeFinder(beginRoutes[0], endRoutes[0], []);
+              return routeFinder(beginRoutes[0], endRoutes[0], []);
             };
             this.setState({ intersections, stopRouteFinder });
             return;
