@@ -11,7 +11,7 @@ class App extends Component {
       routesWithStops: [],
       multiRouteStops: [],
       maxStops: NaN,
-      minStops: NaN
+      minStops: NaN,
     };
   }
   componentDidMount() {
@@ -26,7 +26,7 @@ class App extends Component {
           .map(id =>
             fetch(`https://api-v3.mbta.com/stops?filter%5Broute%5D=${id}`)
               .then(d => d.json())
-              .then(d => d.data)
+              .then(d => d.data),
           );
         Promise.all(stopPromises)
           .then(d => {
@@ -48,25 +48,20 @@ class App extends Component {
               });
               return memo;
             }, {});
-            const multiRouteStops = Object.entries(stopIndexed).filter(
-              ([e, v]) => v.length > 1
-            );
+            const multiRouteStops = Object.entries(stopIndexed).filter(([e, v]) => v.length > 1);
             this.setState({ multiRouteStops });
-            const intersections = multiRouteStops.reduce(
-              (memo, [_, routes]) => {
-                const stops = routes
-                  .map((r, i, list) => {
-                    return list.slice(i + 1).map(d =>
-                      // quotes are for graphviz output maybe get rid of them
-                      r < d ? `"${r}" -- "${d}"` : `"${d}" -- "${r}"`
-                    );
-                  })
-                  .flat();
-                stops.forEach(i => memo.add(i));
-                return memo;
-              },
-              new Set()
-            );
+            const intersections = multiRouteStops.reduce((memo, [_, routes]) => {
+              const stops = routes
+                .map((r, i, list) => {
+                  return list.slice(i + 1).map(d =>
+                    // quotes are for graphviz output maybe get rid of them
+                    r < d ? `"${r}" -- "${d}"` : `"${d}" -- "${r}"`,
+                  );
+                })
+                .flat();
+              stops.forEach(i => memo.add(i));
+              return memo;
+            }, new Set());
             const edgeList = Array.from(intersections);
             const routeFinder = (begin, end, path) => {
               const validRoutes = routes.map(d => d.attributes.long_name);
@@ -79,12 +74,8 @@ class App extends Component {
               if (begin === end) {
                 return [begin];
               }
-              const beginEdges = edgeList.filter(
-                edge => edge.indexOf(begin) > -1
-              );
-              const beginEndConnected = beginEdges.some(
-                edge => edge.indexOf(end) > -1
-              );
+              const beginEdges = edgeList.filter(edge => edge.indexOf(begin) > -1);
+              const beginEndConnected = beginEdges.some(edge => edge.indexOf(end) > -1);
               if (beginEndConnected) {
                 console.log([begin, ...path, end]);
                 return [begin, ...path, end];
@@ -94,7 +85,7 @@ class App extends Component {
                   e
                     .replace(`"${begin}"`, "")
                     .replace(" -- ", "")
-                    .replace(/"/g, "")
+                    .replace(/"/g, ""),
                 )
                 .filter(e => path.indexOf(e) === -1);
               for (const next of nextEdges) {
@@ -118,7 +109,7 @@ class App extends Component {
             console.log(
               `graph {
   ${Array.from(intersections).join("\n  ")}
-}`
+}`,
             );
           })
           .catch(e => {
@@ -131,17 +122,7 @@ class App extends Component {
         console.error(e);
       });
   }
-  render(
-    _,
-    {
-      routes,
-      routesWithStops,
-      maxStops,
-      minStops,
-      multiRouteStops,
-      stopRouteFinder
-    }
-  ) {
+  render(_, { routes, routesWithStops, maxStops, minStops, multiRouteStops, stopRouteFinder }) {
     if (stopRouteFinder) {
       console.log(stopRouteFinder("Mattapan", "Wonderland"));
     }
@@ -153,7 +134,7 @@ class App extends Component {
             ${routes.map(
               r => html`
                 <li>${r.attributes.long_name}</li>
-              `
+              `,
             )}
           </ol>
         </section>
@@ -163,27 +144,24 @@ class App extends Component {
           ${routesWithStops
             .filter(r => r.stopCount === maxStops)
             .map(
-              r =>
-                html`
-                  <div>${r.attributes.long_name}</div>
-                `
+              r => html`
+                <div>${r.attributes.long_name}</div>
+              `,
             )}
           <h2>b) Fewest Stops</h2>
           ${routesWithStops
             .filter(r => r.stopCount === minStops)
             .map(
-              r =>
-                html`
-                  <div>${r.attributes.long_name}</div>
-                `
+              r => html`
+                <div>${r.attributes.long_name}</div>
+              `,
             )}
           <h2>c) Multiple Routes</h2>
           ${multiRouteStops.map(
-            ([s, rs]) =>
-              html`
-                <h3>${s} Stop is on these Routes</h3>
-                <p>${rs.join(", ")}</p>
-              `
+            ([s, rs]) => html`
+              <h3>${s} Stop is on these Routes</h3>
+              <p>${rs.join(", ")}</p>
+            `,
           )}
         </section>
         <section>
@@ -201,5 +179,5 @@ render(
   html`
     <${App} />
   `,
-  document.getElementById("app")
+  document.getElementById("app"),
 );
