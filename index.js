@@ -40,16 +40,11 @@ class App extends Component {
               });
               return memo;
             }, {});
-            const multiRouteStops = Object.entries(stopIndexed).filter(([e, v]) => v.length > 1);
+            const multiRouteStops = Object.entries(stopIndexed).filter(([_, v]) => v.length > 1);
             this.setState({ multiRouteStops });
             const intersections = multiRouteStops.reduce((memo, [_, routes]) => {
               const stops = routes
-                .map((r, i, list) => {
-                  return list.slice(i + 1).map(d =>
-                    // quotes are for graphviz output maybe get rid of them
-                    r < d ? `"${r}" -- "${d}"` : `"${d}" -- "${r}"`,
-                  );
-                })
+                .map((r, i, l) => l.slice(i + 1).map(d => (r < d ? `${r}-${d}` : `${d}-${r}`)))
                 .flat();
               stops.forEach(i => memo.add(i));
               return memo;
@@ -72,12 +67,7 @@ class App extends Component {
                 return [begin, ...path, end];
               }
               const nextEdges = beginEdges
-                .map(e =>
-                  e
-                    .replace(`"${begin}"`, "")
-                    .replace(" -- ", "")
-                    .replace(/"/g, ""),
-                )
+                .map(e => e.replace(begin, "").replace("-", ""))
                 .filter(e => path.indexOf(e) === -1);
               for (const next of nextEdges) {
                 return routeFinder(next, end, path.concat([begin]));
@@ -95,13 +85,6 @@ class App extends Component {
               return routeFinder(beginRoutes[0], endRoutes[0], []);
             };
             this.setState({ intersections, stopRouteFinder });
-            return;
-            // useful for checking out what the route intersection graph looks like
-            console.log(
-              `graph {
-  ${Array.from(intersections).join("\n  ")}
-}`,
-            );
           })
           .catch(e => {
             console.error("fetch stops problem");
@@ -115,6 +98,8 @@ class App extends Component {
   }
   render(_, { routes, maxRoute, minRoute, multiRouteStops, stopRouteFinder }) {
     if (stopRouteFinder) {
+      console.log(stopRouteFinder("Davis", "Kendall/MIT"));
+      console.log(stopRouteFinder("Ashmont", "Arlington"));
       console.log(stopRouteFinder("Mattapan", "Wonderland"));
     }
     return html`
