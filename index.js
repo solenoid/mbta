@@ -101,7 +101,7 @@ class App extends Component {
       console.log(stopRouteFinder("Mattapan", "Wonderland"));
     }
     return html`
-      <div class="main">
+      <div>
         <section>
           <h1>Problem 1)</h1>
           <ol>
@@ -132,9 +132,7 @@ class App extends Component {
         </section>
         <section>
           <h1>Problem 3)</h1>
-          <div>
-            console only output so far
-          </div>
+          <div>console only output so far</div>
         </section>
       </div>
     `;
