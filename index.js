@@ -10,7 +10,6 @@ class App extends Component {
       routes: [],
       routesWithStops: [],
       multiRouteStops: [],
-      intersections: new Set(),
       maxStops: NaN,
       minStops: NaN
     };
@@ -18,18 +17,14 @@ class App extends Component {
   componentDidMount() {
     fetch("https://api-v3.mbta.com/routes?filter%5Btype%5D=0,1")
       .then(d => d.json())
-      .then(d => {
-        const routes = d.data.map(r => {
-          r.stops = [];
-          return r;
-        });
+      .then(({ data: routes }) => {
         this.setState({ routes });
         // TODO see if there is a better way to get stops instead of
         //      fanning out a fetch promise for each route
         const stopPromises = routes
           .map(r => r.id)
           .map(id =>
-            fetch("https://api-v3.mbta.com/stops?filter%5Broute%5D=" + id)
+            fetch(`https://api-v3.mbta.com/stops?filter%5Broute%5D=${id}`)
               .then(d => d.json())
               .then(d => d.data)
           );
@@ -72,9 +67,52 @@ class App extends Component {
               },
               new Set()
             );
-            // TODO consider making a function to store on state that does a
-            //      DFS traverse of intersections
-            this.setState({ intersections });
+            const edgeList = Array.from(intersections);
+            const routeFinder = (begin, end, path) => {
+              const validRoutes = routes.map(d => d.attributes.long_name);
+              if (validRoutes.indexOf(begin) === -1) {
+                throw new Error(`Invalid begin route ${begin}`);
+              }
+              if (validRoutes.indexOf(end) === -1) {
+                throw new Error(`Invalid begin route ${end}`);
+              }
+              if (begin === end) {
+                return [begin];
+              }
+              const beginEdges = edgeList.filter(
+                edge => edge.indexOf(begin) > -1
+              );
+              const beginEndConnected = beginEdges.some(
+                edge => edge.indexOf(end) > -1
+              );
+              if (beginEndConnected) {
+                console.log([begin, ...path, end]);
+                return [begin, ...path, end];
+              }
+              const nextEdges = beginEdges
+                .map(e =>
+                  e
+                    .replace(`"${begin}"`, "")
+                    .replace(" -- ", "")
+                    .replace(/"/g, "")
+                )
+                .filter(e => path.indexOf(e) === -1);
+              for (const next of nextEdges) {
+                return routeFinder(next, end, path.concat([begin]));
+              }
+            };
+            const stopRouteFinder = (begin, end) => {
+              const beginRoutes = stopIndexed[begin];
+              if (!beginRoutes) {
+                throw new Error(`Invalid begin stop ${begin}`);
+              }
+              const endRoutes = stopIndexed[end];
+              if (!endRoutes) {
+                throw new Error(`Invalid end stop ${end}`);
+              }
+              routeFinder(beginRoutes[0], endRoutes[0], []);
+            };
+            this.setState({ intersections, stopRouteFinder });
             return;
             // useful for checking out what the route intersection graph looks like
             console.log(
@@ -101,9 +139,12 @@ class App extends Component {
       maxStops,
       minStops,
       multiRouteStops,
-      intersections
+      stopRouteFinder
     }
   ) {
+    if (stopRouteFinder) {
+      console.log(stopRouteFinder("Mattapan", "Wonderland"));
+    }
     return html`
       <div class="main">
         <section>
@@ -148,7 +189,7 @@ class App extends Component {
         <section>
           <h1>Problem 3)</h1>
           <div>
-            ${intersections.size} unique intersections amongst routes
+            console only output so far
           </div>
         </section>
       </div>
