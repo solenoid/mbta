@@ -1,7 +1,5 @@
 import { render, Component, h } from "./web_modules/preact.js";
 import htm from "./web_modules/htm.js";
-// - https://www.pikapkg.com/blog/pika-web-a-future-without-webpack#pika-web-web-apps-without-the-bundler
-// - https://www.npmjs.com/package/htm
 const html = htm.bind(h);
 class App extends Component {
   componentDidMount() {
@@ -125,9 +123,9 @@ class App extends Component {
           <h2>c) Multiple Routes</h2>
           ${multiRouteStops
             ? multiRouteStops.map(
-                ([s, rs]) => html`
-                  <h3>${s} Stop is on these Routes</h3>
-                  <p>${rs.join(", ")}</p>
+                ([stop, routes]) => html`
+                  <h3>${stop} Stop is on these Routes</h3>
+                  <p>${routes.join(", ")}</p>
                 `,
               )
             : null}
