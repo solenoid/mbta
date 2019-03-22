@@ -4,16 +4,6 @@ import htm from "./web_modules/htm.js";
 // - https://www.npmjs.com/package/htm
 const html = htm.bind(h);
 class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      routes: [],
-      routesWithStops: [],
-      multiRouteStops: [],
-      maxStops: NaN,
-      minStops: NaN,
-    };
-  }
   componentDidMount() {
     fetch("https://api-v3.mbta.com/routes?filter%5Btype%5D=0,1")
       .then(d => d.json())
@@ -36,9 +26,11 @@ class App extends Component {
               return r;
             });
             const stopCounts = routesWithStops.map(r => r.stopCount);
-            const maxStops = Math.max(...stopCounts);
-            const minStops = Math.min(...stopCounts);
-            this.setState({ routesWithStops, maxStops, minStops });
+            const max = Math.max(...stopCounts);
+            const min = Math.min(...stopCounts);
+            const maxRoute = routesWithStops.find(d => d.stopCount === max).attributes.long_name;
+            const minRoute = routesWithStops.find(d => d.stopCount === min).attributes.long_name;
+            this.setState({ maxRoute, minRoute });
             const stopIndexed = routesWithStops.reduce((memo, r) => {
               r.stops.forEach(s => {
                 // assume names are unique if not use ids instead
@@ -77,7 +69,6 @@ class App extends Component {
               const beginEdges = edgeList.filter(edge => edge.indexOf(begin) > -1);
               const beginEndConnected = beginEdges.some(edge => edge.indexOf(end) > -1);
               if (beginEndConnected) {
-                console.log([begin, ...path, end]);
                 return [begin, ...path, end];
               }
               const nextEdges = beginEdges
@@ -122,7 +113,7 @@ class App extends Component {
         console.error(e);
       });
   }
-  render(_, { routes, routesWithStops, maxStops, minStops, multiRouteStops, stopRouteFinder }) {
+  render(_, { routes, maxRoute, minRoute, multiRouteStops, stopRouteFinder }) {
     if (stopRouteFinder) {
       console.log(stopRouteFinder("Mattapan", "Wonderland"));
     }
@@ -131,38 +122,30 @@ class App extends Component {
         <section>
           <h1>Problem 1)</h1>
           <ol>
-            ${routes.map(
-              r => html`
-                <li>${r.attributes.long_name}</li>
-              `,
-            )}
+            ${routes
+              ? routes.map(
+                  r => html`
+                    <li>${r.attributes.long_name}</li>
+                  `,
+                )
+              : null}
           </ol>
         </section>
         <section>
           <h1>Problem 2)</h1>
           <h2>a) Most Stops</h2>
-          ${routesWithStops
-            .filter(r => r.stopCount === maxStops)
-            .map(
-              r => html`
-                <div>${r.attributes.long_name}</div>
-              `,
-            )}
+          <div>${maxRoute}</div>
           <h2>b) Fewest Stops</h2>
-          ${routesWithStops
-            .filter(r => r.stopCount === minStops)
-            .map(
-              r => html`
-                <div>${r.attributes.long_name}</div>
-              `,
-            )}
+          <div>${minRoute}</div>
           <h2>c) Multiple Routes</h2>
-          ${multiRouteStops.map(
-            ([s, rs]) => html`
-              <h3>${s} Stop is on these Routes</h3>
-              <p>${rs.join(", ")}</p>
-            `,
-          )}
+          ${multiRouteStops
+            ? multiRouteStops.map(
+                ([s, rs]) => html`
+                  <h3>${s} Stop is on these Routes</h3>
+                  <p>${rs.join(", ")}</p>
+                `,
+              )
+            : null}
         </section>
         <section>
           <h1>Problem 3)</h1>
