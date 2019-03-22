@@ -26,9 +26,9 @@ class App extends Component {
             const stopCounts = routesWithStops.map(r => r.stopCount);
             const max = Math.max(...stopCounts);
             const min = Math.min(...stopCounts);
-            const maxRoute = routesWithStops.find(d => d.stopCount === max).attributes.long_name;
-            const minRoute = routesWithStops.find(d => d.stopCount === min).attributes.long_name;
-            this.setState({ maxRoute, minRoute });
+            const maxName = routesWithStops.find(d => d.stopCount === max).attributes.long_name;
+            const minName = routesWithStops.find(d => d.stopCount === min).attributes.long_name;
+            this.setState({ maxRoute: `${maxName} - ${max}`, minRoute: `${minName} - ${min}` });
             const stopIndexed = routesWithStops.reduce((memo, r) => {
               r.stops.forEach(s => {
                 // assume names are unique if not use ids instead
